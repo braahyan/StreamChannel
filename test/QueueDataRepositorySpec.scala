@@ -31,6 +31,6 @@ class QueueDataRepositorySpec extends Specification {
         id must beSome[Long]
         id must beSome(1)
     }
-      }
+  }
 
 }

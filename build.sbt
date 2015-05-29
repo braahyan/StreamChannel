@@ -18,5 +18,3 @@ libraryDependencies ++= Seq(
 
 
 javaOptions in Test += "-Dconfig.file=conf/application.test.conf"
-
-javaOptions in Test +="-DapplyEvolutions.default=true"

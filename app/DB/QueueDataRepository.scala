@@ -15,11 +15,17 @@ class QueueDataRepository {
     return id
   }
 
-  def getDataFromQueue()(implicit conn:Connection): Unit = {
+  def getDataFromQueue()(implicit conn:Connection): List[(DateTime, String)] = {
     val query = SQL("select * from Queue").executeQuery()
     query().map(row =>
       row[DateTime]("gathered_time") -> row[String]("data")
     ).toList
+  }
+
+  def purgeDataFromQueue()(implicit conn:Connection): Int = {
+    val query = SQL("delete from Queue")
+    val deletedRows = query.executeUpdate()
+    deletedRows
   }
 
 }

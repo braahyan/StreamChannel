@@ -1,0 +1,1 @@
+spark-submit   --class "spark.AnalyticsApp"   --master local[4]   --jars /usr/local/hadoop/share/hadoop/tools/lib/hadoop-aws-2.6.0.jar,/home/bryan/Desktop/aws-java-sdk-1.9.39/lib/aws-java-sdk-1.9.39.jar,/usr/local/hadoop/share/hadoop/tools/lib/guava-11.0.2.jar target/scala-2.11/my-first-app_2.11-1.0-SNAPSHOT.jar

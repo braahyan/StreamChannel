@@ -20,7 +20,7 @@ trait QueueDataRepositoryTrait {
   def getQueueLength()(implicit conn: Connection): Int
 }
 
-case class QueueData(data: JsValue, time: DateTime, serverTime: Option[DateTime]) {
+case class QueueData(data: JsValue, serverTime: Option[DateTime]) {
   def withTimeStamp(serverTimestamp: DateTime): QueueData = {
     serverTime match {
       case Some(_) => this
@@ -31,4 +31,10 @@ case class QueueData(data: JsValue, time: DateTime, serverTime: Option[DateTime]
 
 object QueueData {
   implicit val queueDataFormat = Json.format[QueueData]
+}
+
+case class WebEvent(document_location: String, referrer: Option[String], event: String, id: Int, first_visit: Boolean)
+
+object WebEvent {
+  implicit val webeventReads = Json.reads[WebEvent]
 }

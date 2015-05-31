@@ -1,5 +1,4 @@
 import db.{QueueData, QueueDataRepository}
-import org.joda.time.DateTime
 import org.junit.runner._
 import org.specs2.mutable._
 import org.specs2.runner._
@@ -16,7 +15,7 @@ class QueueDataRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new QueueDataRepository
-        val id = queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime(), None))
+        val id = queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
         id must beSome[Long]
         id must beSome(1)
     }
@@ -28,9 +27,8 @@ class QueueDataRepositorySpec extends Specification {
         val queueDataRepostiory = new QueueDataRepository
         val queue = queueDataRepostiory.getDataFromQueue()
         queue mustEqual(Nil)
-        val date = new DateTime()
         val dataString = "fooobar"
-        val data = QueueData(JsString(dataString), date, None)
+        val data = QueueData(JsString(dataString), None)
         queueDataRepostiory.addDataToQueue(data)
         val newData = queueDataRepostiory.getDataFromQueue()
         newData.length mustEqual(1)
@@ -42,8 +40,8 @@ class QueueDataRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new QueueDataRepository
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
         val checkData = queueDataRepostiory.getDataFromQueue()
         checkData.length mustEqual(2)
         val deletedRows = queueDataRepostiory.purgeDataFromQueue()
@@ -57,8 +55,8 @@ class QueueDataRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new QueueDataRepository
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
         val checkData = queueDataRepostiory.getQueueLength()
         checkData mustEqual(2)
     }

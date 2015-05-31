@@ -1,10 +1,10 @@
 package upload
 
-import db.QueueData
-import awscala.s3._
 import awscala._
+import awscala.s3._
 import com.amazonaws.services.s3.model.ObjectMetadata
-import play.Logger
+import db.QueueData
+import play.api.Play
 import play.api.libs.json._
 
 import scala.io.Source
@@ -16,7 +16,7 @@ import scala.io.Source
 class S3Uploader {
   implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
   val bucketName = "datalogs-streamchannel"
-  implicit val s3 = S3("AKIAJ6GZ5D7G7KE7GI3A","iPR4xZjwzdbj0JZMmTxRoi0dFOpXE5e4vPuVfPz2")(Region.US_EAST_1)
+  implicit val s3 = S3(Play.current.configuration.getString("streamchannel.aws.clientKey").get,Play.current.configuration.getString("streamchannel.aws.clientSecret").get)(Region.US_EAST_1)
 
   def GenerateKeyData(queueEntries:Seq[QueueData]):(String, DateTime, DateTime) = {
     val dates = queueEntries.map(x=>x.serverTime.get)

@@ -24,6 +24,8 @@ object ScalaClient {
   }
 
   def genData() {
+    val websites = Seq("bareia.com","pvp.com","ole.com","bart.com")
+
     val referrers = Seq(Some("google.com"),Some("reddit.com"),Some("facebook.com"),Some("twitter.com"),
                     Some("linkedin.com"),Some("thrivehive.com"),None)
     val pages = Seq("index.html", "aboutus.html", "contactus.html", "services.html", "pricing.html", "ourteam.html")
@@ -31,17 +33,36 @@ object ScalaClient {
     val forms = Map(("contactus.html", "contact-form"), ("landingpage.html", "content-download"))
 
 
+    def makeUrl(domain:String, page:String)={
+      s"http://$domain/$page"
+    }
+
     val startTime = DateTime.now()
     for (x <- 1 to 1000) {
       var time = startTime.plusSeconds(Random.nextInt(10000))
-      var currentPage = randomElement (entryPages)
-      var previousPage: Option[String] = randomElement(referrers)
-      for (y <- 1 to Random.nextInt(10)) {
-        ScalaClient.pushData(QueueData(Json.obj(("type", "web"), ("event", "web-visit"), ("id", x), ("current", currentPage), ("previous", previousPage)), time, Some(time)))
-        previousPage = Some(currentPage)
-        currentPage = randomElement(pages)
-        time = time.plusSeconds(Random.nextInt(300))
+      var website = randomElement(websites)
+      var document_location = makeUrl(website, randomElement (entryPages))
+      var referrer: Option[String] = randomElement(referrers) match{
+        case None => None
+        case Some(y)=> Some(makeUrl(y,""))
       }
+      for (y <- 1 to Random.nextInt(10)) {
+        val firstVisit = if (y ==1 ){true}else{false}
+        val queueData = QueueData(
+                      Json.obj(
+                        ("first_visit",firstVisit),
+                        ("event", "page-view"),
+                        ("id", x),
+                        ("document_location", document_location),
+                        ("referrer", referrer)),
+          Some(time))
+        ScalaClient.pushData(queueData)
+        println(queueData)
+        referrer = Some(document_location)
+        document_location = makeUrl(website, randomElement(pages))
+        time = time.plusSeconds(Random.nextInt(2000)) // greater than number of seconds in 30 minutes
+      }
+      website = randomElement(websites)
     }
   }
 }

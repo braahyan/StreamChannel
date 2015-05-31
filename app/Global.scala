@@ -7,12 +7,8 @@ import play.api._
 import play.api.db.DB
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json.Json
-import play.api.mvc.Results._
-import play.api.mvc._
 import upload.S3Uploader
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
 
 
@@ -28,13 +24,11 @@ object Global extends GlobalSettings {
           val queueDataRepository = new QueueDataRepository()
           val queueLength = queueDataRepository.getQueueLength()
           val s3Uploader = new S3Uploader()
-          Logger.info("going to cull queue?")
           if (queueLength > 0 &&
             (queueLength > 1000 || ((DateTime.now().getMillis - lastPurgeTime.getMillis) > 5000))) {
             s3Uploader.UploadQueueEntries(queueDataRepository.getDataFromQueue())
             queueDataRepository.purgeDataFromQueue()
             lastPurgeTime = DateTime.now()
-            Logger.info("culled queue")
           }
       }
     }

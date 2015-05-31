@@ -11,8 +11,8 @@ import play.api.libs.json.{JsValue, Json}
  */
 class QueueDataRepository extends QueueDataRepositoryTrait {
   override def addDataToQueue(data: QueueData)(implicit conn: Connection): Option[Long] = {
-    val id: Option[Long] = SQL("insert into Queue (gathered_time, data, server_time) values ({gathered_time}, {data}, {server_time})")
-      .on('gathered_time -> data.time, 'data -> Json.stringify(data.data), 'server_time -> data.serverTime)
+    val id: Option[Long] = SQL("insert into Queue (data, server_time) values ({data}, {server_time})")
+      .on('data -> Json.stringify(data.data), 'server_time -> data.serverTime)
       .executeInsert()
     return id
   }
@@ -22,7 +22,6 @@ class QueueDataRepository extends QueueDataRepositoryTrait {
     query().map(row =>
       QueueData(Json.parse(row[String]("data"))
         .validate[JsValue].fold(x => throw new Exception, x => x),
-        row[DateTime]("gathered_time"),
         row[Option[DateTime]]("server_time"))
     ).toList
   }

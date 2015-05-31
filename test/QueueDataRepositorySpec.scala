@@ -1,9 +1,10 @@
-import DB.QueueDataRepository
+import db.{QueueData, QueueDataRepository}
 import org.joda.time.DateTime
 import org.junit.runner._
 import org.specs2.mutable._
 import org.specs2.runner._
 import play.api.db.DB
+import play.api.libs.json.JsString
 import play.api.test._
 
 
@@ -15,7 +16,7 @@ class QueueDataRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new QueueDataRepository
-        val id = queueDataRepostiory.addDataToQueue(new DateTime(), "")
+        val id = queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime(), None))
         id must beSome[Long]
         id must beSome(1)
     }
@@ -28,11 +29,12 @@ class QueueDataRepositorySpec extends Specification {
         val queue = queueDataRepostiory.getDataFromQueue()
         queue mustEqual(Nil)
         val date = new DateTime()
-        val data = "fooobar"
-        queueDataRepostiory.addDataToQueue(date, data)
+        val dataString = "fooobar"
+        val data = QueueData(JsString(dataString), date, None)
+        queueDataRepostiory.addDataToQueue(data)
         val newData = queueDataRepostiory.getDataFromQueue()
         newData.length mustEqual(1)
-        newData(0) mustEqual((date, data))
+        newData(0) mustEqual(data)
     }
   }
 
@@ -40,13 +42,25 @@ class QueueDataRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new QueueDataRepository
-        queueDataRepostiory.addDataToQueue(new DateTime(), "")
-        queueDataRepostiory.addDataToQueue(new DateTime(), "")
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
         val checkData = queueDataRepostiory.getDataFromQueue()
         checkData.length mustEqual(2)
-        queueDataRepostiory.purgeDataFromQueue()
+        val deletedRows = queueDataRepostiory.purgeDataFromQueue()
+        deletedRows mustEqual(2)
         val queueData = queueDataRepostiory.getDataFromQueue()
         queueData mustEqual(Nil)
+    }
+  }
+
+  "count returns appropriate numbers" in new WithApplication {
+    DB.withTransaction {
+      implicit conn =>
+        val queueDataRepostiory = new QueueDataRepository
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
+        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), new DateTime, None))
+        val checkData = queueDataRepostiory.getQueueLength()
+        checkData mustEqual(2)
     }
   }
 

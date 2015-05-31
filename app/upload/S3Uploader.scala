@@ -22,7 +22,7 @@ class S3Uploader {
     val dates = queueEntries.map(x=>x.serverTime.get)
     val maxDate = dates.max
     val minDate = dates.min
-    (minDate.toString + maxDate.toString, minDate, maxDate)
+    (minDate.getMillis.toString + "-" + maxDate.getMillis.toString, minDate, maxDate)
   }
 
   def GetBucket(bucketName:String) : Bucket = {

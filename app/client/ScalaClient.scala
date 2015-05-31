@@ -33,7 +33,7 @@ object ScalaClient {
 
     val startTime = DateTime.now()
     for (x <- 1 to 1000) {
-      var time = startTime
+      var time = startTime.plusSeconds(Random.nextInt(10000))
       var currentPage = randomElement (entryPages)
       var previousPage: Option[String] = randomElement(referrers)
       for (y <- 1 to Random.nextInt(10)) {

@@ -1,9 +1,12 @@
+import db._
+import org.junit.runner._
+import org.specs2.mock.Mockito
 import org.specs2.mutable._
 import org.specs2.runner._
-import org.junit.runner._
-
-import play.api.test._
+import play.Logger
+import play.api.libs.json.Json
 import play.api.test.Helpers._
+import play.api.test._
 
 /**
  * Add your spec here.
@@ -11,20 +14,32 @@ import play.api.test.Helpers._
  * For more information, consult the wiki.
  */
 @RunWith(classOf[JUnitRunner])
-class ApplicationSpec extends Specification {
+class ApplicationSpec extends Specification with Mockito{
 
   "Application" should {
 
-    "send 404 on a bad request" in new WithApplication{
-      route(FakeRequest(GET, "/boum")) must beNone
+    "addData returns 400 and message 'failure' with bad json" in new WithApplication {
+      val home = route(FakeRequest(POST, "/adddata").withJsonBody(Json.obj(
+        "email" -> "fa...@email.pl",
+        "password" -> "fakepassword"
+      ))).get
+
+      status(home) must equalTo(400)
+      contentType(home) must beSome.which(_ == "application/json")
+      contentAsString(home) must contain("message")
+      contentAsString(home) must contain("failure")
     }
 
-    "render the index page" in new WithApplication{
-      val home = route(FakeRequest(GET, "/")).get
+    "addData returns 200 and message 'success' with good json" in new WithApplication {
+      val home = route(FakeRequest(POST, "/adddata").withJsonBody(Json.obj(
+        "data" -> "foobar",
+        "time" -> "2015-01-01"
+      ))).get
 
-      status(home) must equalTo(OK)
-      contentType(home) must beSome.which(_ == "text/plain")
-      contentAsString(home) must contain ("'sup")
+      status(home) must equalTo(200)
+      contentType(home) must beSome.which(_ == "application/json")
+      contentAsString(home) must contain("message")
+      contentAsString(home) must contain("success")
     }
   }
 }

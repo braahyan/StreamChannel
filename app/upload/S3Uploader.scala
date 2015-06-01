@@ -15,14 +15,15 @@ import scala.io.Source
  */
 class S3Uploader {
   implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
-  val bucketName = "datalogs-streamchannel"
+  val bucketName = Play.current.configuration.getString("streamchannel.s3.bucketName").get
+  val keyRoot = Play.current.configuration.getString("streamchannel.s3.readTarget").get
   implicit val s3 = S3(Play.current.configuration.getString("streamchannel.aws.clientKey").get,Play.current.configuration.getString("streamchannel.aws.clientSecret").get)(Region.US_EAST_1)
 
-  def GenerateKeyData(queueEntries:Seq[QueueData]):(String, DateTime, DateTime) = {
+  def GenerateKeyData(beginning:String,queueEntries:Seq[QueueData]):(String, DateTime, DateTime) = {
     val dates = queueEntries.map(x=>x.serverTime.get)
     val maxDate = dates.max
     val minDate = dates.min
-    (minDate.getMillis.toString + "-" + maxDate.getMillis.toString, minDate, maxDate)
+    (beginning + "/" + minDate.getMillis.toString + "-" + maxDate.getMillis.toString, minDate, maxDate)
   }
 
   def GetBucket(bucketName:String) : Bucket = {
@@ -34,7 +35,7 @@ class S3Uploader {
 
   def UploadQueueEntries(queueEntries:Seq[QueueData]) :String = {
 
-    val key = GenerateKeyData(queueEntries)
+    val key = GenerateKeyData(keyRoot,queueEntries)
 
 
     val metadata = new ObjectMetadata()

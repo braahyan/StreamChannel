@@ -79,3 +79,7 @@ crashlytics-build.properties
 
 #data folder
 data/
+
+#aws conf
+aws.conf
+testaws.conf

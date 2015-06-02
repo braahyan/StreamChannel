@@ -11,6 +11,8 @@ import play.api.mvc._
 
 object Application extends Controller {
   val queueDataRepo = new QueueDataRepository
+  val referrerDataRepo = new ReferrerDataRepository
+  val visitDataRepo = new VisitDataRepository
 
   def addData() = Action(parse.json) { implicit request =>
     request.body.validate[QueueData]
@@ -32,6 +34,18 @@ object Application extends Controller {
   def getData() = Action {implicit request =>
       DB.withTransaction(implicit conn =>
         Ok(Json.toJson(queueDataRepo.getDataFromQueue()))
+    )
+  }
+
+  def getReferrerData() = Action {implicit request =>
+    DB.withTransaction(implicit conn =>
+      Ok(Json.toJson(referrerDataRepo.GetData()))
+    )
+  }
+
+  def getVisitData() = Action{implicit request =>
+    DB.withTransaction(implicit conn =>
+      Ok(Json.toJson(visitDataRepo.GetData()))
     )
   }
 

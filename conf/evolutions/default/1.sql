@@ -10,6 +10,23 @@ CREATE TABLE Queue (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE VisitorData(
+    data_time timestamp,
+    website varchar(300),
+    visitors int,
+    primary key (data_time, website)
+);
+
+CREATE TABLE ReferrerData(
+    data_time timestamp,
+    website varchar(300),
+    referrer varchar(300),
+    visitors int,
+    primary key (data_time, website, referrer)
+);
+
 # --- !Downs
 
 DROP TABLE Queue;
+DROP TABLE ReferrerData;
+DROP TABLE VisitorData;

@@ -17,7 +17,7 @@ class S3Uploader {
   implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
   val bucketName = Play.current.configuration.getString("streamchannel.s3.bucketName").get
   val keyRoot = Play.current.configuration.getString("streamchannel.s3.readTarget").get
-  implicit val s3 = S3(Play.current.configuration.getString("streamchannel.aws.clientKey").get,Play.current.configuration.getString("streamchannel.aws.clientSecret").get)(Region.US_EAST_1)
+
 
   def GenerateKeyData(beginning:String,queueEntries:Seq[QueueData]):(String, DateTime, DateTime) = {
     val dates = queueEntries.map(x=>x.serverTime.get)
@@ -26,14 +26,14 @@ class S3Uploader {
     (beginning + "/" + minDate.getMillis.toString + "-" + maxDate.getMillis.toString, minDate, maxDate)
   }
 
-  def GetBucket(bucketName:String) : Bucket = {
+  def GetBucket(bucketName:String)(implicit s3:S3) : Bucket = {
     s3.bucket(bucketName) match{
       case None => throw new Exception()
       case Some(y) => y
     }
   }
 
-  def UploadQueueEntries(queueEntries:Seq[QueueData]) :String = {
+  def UploadQueueEntries(queueEntries:Seq[QueueData])(implicit s3:S3) :String = {
 
     val key = GenerateKeyData(keyRoot,queueEntries)
 
@@ -50,7 +50,7 @@ class S3Uploader {
     key._1
   }
 
-  def GetQueueEntries(key:String) : Seq[QueueData] = {
+  def GetQueueEntries(key:String)(implicit s3:S3) : Seq[QueueData] = {
     val queueDataS3Object = GetBucket(bucketName).get(key)
       match {
       case None => throw new Exception()

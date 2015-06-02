@@ -24,6 +24,9 @@ object ScalaClient {
   }
 
   def genData() {
+
+    // this was a script that i have included in the project to simplifiy things for the moment
+
     val websites = Seq("bareia.com","pvp.com","ole.com","bart.com")
 
     val referrers = Seq(Some("google.com"),Some("reddit.com"),Some("facebook.com"),Some("twitter.com"),
@@ -33,7 +36,7 @@ object ScalaClient {
     val forms = Map(("contactus.html", "contact-form"), ("landingpage.html", "content-download"))
 
 
-    def makeUrl(domain:String, page:String)={
+    def makeUrl(domain:String, page:String) = {
       s"http://$domain/$page"
     }
 

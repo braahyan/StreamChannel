@@ -38,3 +38,15 @@ case class WebEvent(document_location: String, referrer: Option[String], event: 
 object WebEvent {
   implicit val webeventReads = Json.reads[WebEvent]
 }
+
+case class ReferrerData(date:DateTime, website:String, referrer:String, value:Int)
+
+object ReferrerData{
+  implicit val referrerDataFormat = Json.format[ReferrerData]
+}
+
+case class VisitData(date:DateTime, website:String, value:Int)
+
+object VisitData{
+  implicit val visitDataFormat = Json.format[VisitData]
+}

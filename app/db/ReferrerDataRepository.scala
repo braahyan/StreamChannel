@@ -19,8 +19,10 @@ class ReferrerDataRepository() {
     }
   }
 
-  def GetData()(implicit conn:Connection) = {
-    val query = SQL("select * from ReferrerData").executeQuery()
+  def GetData(website:String)(implicit conn:Connection) = {
+    val query = SQL("select * from ReferrerData where website like {website}")
+      .on('website -> website)
+      .executeQuery()
     query().map(row =>
       ReferrerData(row[DateTime]("data_time"),row[String]("website"),row[String]("referrer"),row[Int]("visitors"))
     ).toList
@@ -38,10 +40,53 @@ class VisitDataRepository() {
     }
   }
 
-  def GetData()(implicit conn:Connection) = {
-    val query = SQL("select * from VisitorData").executeQuery()
+  def GetData(website:String)(implicit conn:Connection) = {
+    val query = SQL("select * from VisitorData where website like {website}")
+      .on('website -> website)
+      .executeQuery()
     query().map(row =>
       VisitData(row[DateTime]("data_time"),row[String]("website"),row[Int]("visitors"))
+    ).toList
+  }
+}
+
+class PageDataRepository() {
+  def UpdateData(data:Seq[PageData])(implicit conn:Connection): Unit ={
+    data.foreach {
+      data =>
+        val id: Option[Long] = SQL("insert into PageData (data_time,website,page,visitors) values ({date}, {website}, {page}, {visitors})" +
+          " on duplicate key update visitors = {visitors} ")
+          .on('date -> data.date, 'website -> data.website, 'page -> data.page,'visitors -> data.value)
+          .executeInsert()
+    }
+  }
+
+  def GetData(website:String)(implicit conn:Connection) = {
+    val query = SQL("select * from PageData where website like {website}")
+      .on('website -> website)
+      .executeQuery()
+    query().map(row =>
+      PageData(row[DateTime]("data_time"),row[String]("website"),row[String]("page"),row[Int]("visitors"))
+    ).toList
+  }
+}
+
+class WebsiteRepository() {
+  def UpdateData(data:Seq[String])(implicit conn:Connection): Unit ={
+    data.filter(x=>x != "").foreach {
+      data =>
+        val id: Option[Long] = SQL("insert into Websites (website) values ({website})" +
+          "ON DUPLICATE KEY UPDATE website = website")
+          .on('website -> data)
+          .executeInsert()
+    }
+  }
+
+  def GetData()(implicit conn:Connection) = {
+    val query = SQL("select * from Websites")
+      .executeQuery()
+    query().map(row =>
+      Website(row[String]("website"))
     ).toList
   }
 }

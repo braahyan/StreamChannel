@@ -1,0 +1,54 @@
+<html>
+<head>
+    <script type="text/javascript" src="/assets/javascripts/canvasjs.min.js"></script>
+<script src="/assets/javascripts/promise.js"></script>
+    <script type="text/javascript">
+  window.onload = function () {
+
+    var myData = promise.get("/visitdata?website=%25").then(function(error, text, xhr) {
+    var data = JSON.parse(text);
+    data.forEach(function(item){
+       item.date = new Date(item.date)
+    });
+
+    var graphData = data.map(function(element){
+        console.log(element);
+        return {
+        showInLegend: true,
+        name: element.website,
+        type: "line",
+        xValueType: "dateTime",
+        dataPoints: element.events.sort(function(a,b){ return a.date > b.date}).map(function(event){return {x:event.date, y:event.value}})
+        }
+    });
+
+    var chart = new CanvasJS.Chart("chartContainer",
+    {
+      title:{
+      text: "WebEvents By Hour"
+      },
+      axisX:{
+        title: "time",
+        gridThickness: 2,
+        interval:1,
+        intervalType: "hour",
+        valueFormatString: "hh TT K",
+        labelAngle: -20
+      },
+      data: graphData
+    });
+
+    chart.render();
+
+    });
+  }
+  </script>
+<body>
+<div id="chartContainer" style="height: 300px; width: 100%;">
+</div>
+</body>
+</html>
+
+<canvas id="myChart" width="800" height="400"></canvas>
+
+

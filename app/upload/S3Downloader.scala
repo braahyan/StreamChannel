@@ -1,7 +1,7 @@
 package upload
 
 import awscala.s3._
-import db.{VisitData, ReferrerData}
+import db.{PageData, VisitData, ReferrerData}
 import play.api.Play
 import play.api.libs.json.Json
 
@@ -12,6 +12,7 @@ import scala.io.Source
  * Created by bryan on 5/29/15.
  */
 class S3Downloader {
+
 
 
   val bucketName = Play.current.configuration.getString("streamchannel.s3.bucketName").get
@@ -32,8 +33,7 @@ class S3Downloader {
     files.filter(x=>x.contains("part-"))
   }
 
-
-
+  // todo: abstract these methods into a single base method that has a type parameter and takes a key paramter
   def GetReferrerData()(implicit s3:S3): Seq[ReferrerData] = {
 
     val keys = GetBucket(bucketName).keys("output/referrersByHour")
@@ -61,6 +61,36 @@ class S3Downloader {
         case None    => throw new Exception("OMGOMGOMG")    // i don't think that there should ever be a situation where this is true
       })
     return fileContents
+    }
+    return Nil
+  }
+
+  def GetPageData()(implicit s3:S3): Seq[PageData] = {
+    val keys = GetBucket(bucketName).keys("output/pagesByHour")
+    if(HadoopSuccess(keys)){
+      val filesPartKeys = GetPartFileKeys(keys)
+      val bucket = GetBucket(bucketName)
+      val files = filesPartKeys.map(x=>(bucket.get(x)))
+      val fileContents = files.flatMap(x=>x match{
+        case Some(y) => Source.fromInputStream(y.content).getLines().map(x=>Json.parse(x).validate[PageData].get) // we wrote them in as individual strings should abstract this.
+        case None    => throw new Exception("OMGOMGOMG")    // i don't think that there should ever be a situation where this is true
+      })
+      return fileContents
+    }
+    return Nil
+  }
+
+  def GetWebsites()(implicit s3:S3): Seq[String] = {
+    val keys = GetBucket(bucketName).keys("output/websites")
+    if(HadoopSuccess(keys)){
+      val filesPartKeys = GetPartFileKeys(keys)
+      val bucket = GetBucket(bucketName)
+      val files = filesPartKeys.map(x=>(bucket.get(x)))
+      val fileContents = files.flatMap(x=>x match{
+        case Some(y) => Source.fromInputStream(y.content).getLines() // we wrote them in as individual strings should abstract this.
+        case None    => throw new Exception("OMGOMGOMG")    // i don't think that there should ever be a situation where this is true
+      })
+      return fileContents
     }
     return Nil
   }

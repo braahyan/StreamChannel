@@ -13,6 +13,12 @@ object Application extends Controller {
   val queueDataRepo = new QueueDataRepository
   val referrerDataRepo = new ReferrerDataRepository
   val visitDataRepo = new VisitDataRepository
+  val pageDataRepo = new PageDataRepository
+  val websiteRepo = new WebsiteRepository
+
+  def index() = Action{ implicit request =>
+    Ok(views.html.index.render())
+  }
 
   def addData() = Action(parse.json) { implicit request =>
     request.body.validate[QueueData]
@@ -37,15 +43,35 @@ object Application extends Controller {
     )
   }
 
-  def getReferrerData() = Action {implicit request =>
-    DB.withTransaction(implicit conn =>
-      Ok(Json.toJson(referrerDataRepo.GetData()))
+  def getReferrerData(website:String) = Action {implicit request =>
+    DB.withTransaction(implicit conn => {
+      val referrerData = referrerDataRepo.GetData(website)
+      Ok(Json.toJson(referrerData))
+      }
     )
   }
 
-  def getVisitData() = Action{implicit request =>
-    DB.withTransaction(implicit conn =>
-      Ok(Json.toJson(visitDataRepo.GetData()))
+  def getVisitData(website:String) = Action{implicit request =>
+    DB.withTransaction(implicit conn => {
+        val data = visitDataRepo.GetData(website)
+        Ok(Json.toJson(data))
+      }
+    )
+  }
+
+  def getPageData(website:String) = Action { implicit request =>
+    DB.withTransaction(implicit conn => {
+        val data = pageDataRepo.GetData(website)
+        Ok(Json.toJson(data))
+      }
+    )
+  }
+
+  def getWebsites() = Action { implicit request =>
+    DB.withTransaction(implicit conn => {
+      val data = websiteRepo.GetData()
+      Ok(Json.toJson(data))
+    }
     )
   }
 

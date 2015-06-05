@@ -50,3 +50,15 @@ case class VisitData(date:DateTime, website:String, value:Int)
 object VisitData{
   implicit val visitDataFormat = Json.format[VisitData]
 }
+
+case class PageData(date:DateTime, website:String, page:String,value:Int)
+
+object PageData{
+  implicit val pageDataFormat = Json.format[PageData]
+}
+
+case class Website(website:String)
+
+object Website{
+  implicit val websiteFormat = Json.format[Website]
+}

@@ -1,15 +1,16 @@
 import java.sql.Connection
 
-import _root_.db.{VisitDataRepository, QueueDataRepository, ReferrerDataRepository}
+import _root_.db._
 import awscala._
 import awscala.s3.S3
+import play.api.Play.current
 import play.api._
 import play.api.db.DB
 import play.api.libs.concurrent.Akka
 import upload.{S3Downloader, S3Uploader}
-import play.api.Play.current
-import scala.concurrent.duration._
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 /**
  * Created by bryan on 5/20/15.
@@ -20,6 +21,7 @@ object Global extends GlobalSettings {
     implicit val s3 = S3(Play.current.configuration.getString("streamchannel.aws.clientKey").get,
       Play.current.configuration.getString("streamchannel.aws.clientSecret").get)(Region.US_EAST_1)
 
+    // todo: figure out the appropriate abstraction to avoid the duplicated code here.
     // schedules referrerdata check
     Akka.system.scheduler.schedule(0.microsecond, 5.second) {
       DB.withTransaction {
@@ -38,6 +40,28 @@ object Global extends GlobalSettings {
           val referrerDataRepo = new VisitDataRepository()
           val s3downloader = new S3Downloader()
           val data = s3downloader.GetVisitorData()
+          referrerDataRepo.UpdateData(data)
+      }
+    }
+
+    // schedules pagedata check
+    Akka.system.scheduler.schedule(0.microsecond, 5.second) {
+      DB.withTransaction {
+        implicit conn: Connection =>
+          val referrerDataRepo = new PageDataRepository()
+          val s3downloader = new S3Downloader()
+          val data = s3downloader.GetPageData()
+          referrerDataRepo.UpdateData(data)
+      }
+    }
+
+    // schedules website check
+    Akka.system.scheduler.schedule(0.microsecond, 5.second) {
+      DB.withTransaction {
+        implicit conn: Connection =>
+          val referrerDataRepo = new WebsiteRepository()
+          val s3downloader = new S3Downloader()
+          val data = s3downloader.GetWebsites()
           referrerDataRepo.UpdateData(data)
       }
     }

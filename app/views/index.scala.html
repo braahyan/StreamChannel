@@ -1,54 +1,146 @@
 <html>
 <head>
-    <script type="text/javascript" src="/assets/javascripts/canvasjs.min.js"></script>
-<script src="/assets/javascripts/promise.js"></script>
-    <script type="text/javascript">
-  window.onload = function () {
 
-    var myData = promise.get("/visitdata?website=%25").then(function(error, text, xhr) {
-    var data = JSON.parse(text);
-    data.forEach(function(item){
-       item.date = new Date(item.date)
-    });
-
-    var graphData = data.map(function(element){
-        console.log(element);
-        return {
-        showInLegend: true,
-        name: element.website,
-        type: "line",
-        xValueType: "dateTime",
-        dataPoints: element.events.sort(function(a,b){ return a.date > b.date}).map(function(event){return {x:event.date, y:event.value}})
-        }
-    });
-
-    var chart = new CanvasJS.Chart("chartContainer",
-    {
-      title:{
-      text: "WebEvents By Hour"
-      },
-      axisX:{
-        title: "time",
-        gridThickness: 2,
-        interval:1,
-        intervalType: "hour",
-        valueFormatString: "hh TT K",
-        labelAngle: -20
-      },
-      data: graphData
-    });
-
-    chart.render();
-
-    });
-  }
-  </script>
 <body>
+<ul data-bind="foreach:websites">
+    <li><a href="#" data-bind="text:website, click:chartSite"></a></li>
+</ul>
 <div id="chartContainer" style="height: 300px; width: 100%;">
 </div>
+<div id="referrerContainer" style="height: 300px; width: 100%;">
+</div>
+<div id="pagesContainer" style="height: 300px; width: 100%;">
+</div>
+
+
+
+<script type="text/javascript" src="/assets/javascripts/canvasjs.min.js"></script>
+<script src="/assets/javascripts/promise.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
+<script type="text/javascript">
+    function chartSite(i){
+        var myData = promise.get("/visitdata?website="+i.website).then(function(error, text, xhr) {
+            var data = JSON.parse(text);
+            data.forEach(function(item){
+               item.date = new Date(item.date)
+            });
+
+            var graphData = [{
+                showInLegend: true,
+                name: i.website,
+                type: "line",
+                xValueType: "dateTime",
+                dataPoints: data.sort(function(a,b){ return a.date > b.date}).map(function(event){return {x:event.date, y:event.value}})
+                }];
+
+            var chart = new CanvasJS.Chart("chartContainer",
+            {
+              title:{
+              text: "WebEvents By Hour"
+              },
+              axisX:{
+                title: "time",
+                gridThickness: 2,
+                interval:1,
+                intervalType: "hour",
+                valueFormatString: "YYYY-MM-DD hh TT",
+                labelAngle: -20
+              },
+              data: graphData
+            });
+
+            chart.render();
+        });
+        var myData = promise.get("/referrerdata?website="+i.website).then(function(error, text, xhr) {
+            var data = JSON.parse(text);
+            var keys = [];
+            for(var x in data){
+                keys.push(x);
+            }
+
+            console.log(keys);
+
+            var graphData = keys.map(function(element){
+                return {
+                showInLegend: true,
+                name: element,
+                type: "line",
+                xValueType: "dateTime",
+                dataPoints: data[element].map(function(x){ x.date = new Date(x.date); return x;})
+                                         .sort(function(a,b){ return a.date > b.date}).map(function(event){return {x:event.date, y:event.value}})
+                }
+            });
+
+            var chart = new CanvasJS.Chart("referrerContainer",
+            {
+              title:{
+              text: "Referrers By Hour"
+              },
+              axisX:{
+                title: "time",
+                gridThickness: 2,
+                interval:1,
+                intervalType: "hour",
+                valueFormatString: "YYYY-MM-DD hh TT",
+                labelAngle: -20
+              },
+              data: graphData
+            });
+
+            chart.render();
+        });
+         var myData = promise.get("/pagedata?website="+i.website).then(function(error, text, xhr) {
+            var data = JSON.parse(text);
+            var keys = [];
+            for(var x in data){
+                keys.push(x);
+            }
+
+            console.log(keys);
+
+            var graphData = keys.map(function(element){
+                return {
+                showInLegend: true,
+                name: element,
+                type: "line",
+                xValueType: "dateTime",
+                dataPoints: data[element].map(function(x){ x.date = new Date(x.date); return x;})
+                                         .sort(function(a,b){ return a.date > b.date}).map(function(event){return {x:event.date, y:event.value}})
+                }
+            });
+
+            var chart = new CanvasJS.Chart("pagesContainer",
+            {
+              title:{
+              text: "Page Views By Hour"
+              },
+              axisX:{
+                title: "time",
+                gridThickness: 2,
+                interval:1,
+                intervalType: "hour",
+                valueFormatString: "YYYY-MM-DD hh TT",
+                labelAngle: -20
+              },
+              data: graphData
+            });
+
+            chart.render();
+        });
+      }
+
+
+  window.onload = function () {
+        var myModel = {websites:ko.observableArray()};
+        promise.get("/websites").then(function(error, text, xhr) {
+            var data = JSON.parse(text);
+            myModel.websites(data);
+        });
+
+        ko.applyBindings(myModel);
+    }
+  </script>
 </body>
 </html>
-
-<canvas id="myChart" width="800" height="400"></canvas>
 
 

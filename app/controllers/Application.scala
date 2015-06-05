@@ -46,7 +46,7 @@ object Application extends Controller {
   def getReferrerData(website:String) = Action {implicit request =>
     DB.withTransaction(implicit conn => {
       val referrerData = referrerDataRepo.GetData(website)
-      Ok(Json.toJson(referrerData))
+      Ok(Json.toJson(referrerData.groupBy(x=>x.referrer)))
       }
     )
   }
@@ -62,7 +62,7 @@ object Application extends Controller {
   def getPageData(website:String) = Action { implicit request =>
     DB.withTransaction(implicit conn => {
         val data = pageDataRepo.GetData(website)
-        Ok(Json.toJson(data))
+        Ok(Json.toJson(data.groupBy(x=>x.page)))
       }
     )
   }

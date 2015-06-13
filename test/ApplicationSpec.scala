@@ -1,9 +1,9 @@
-import db._
+package test
+
 import org.junit.runner._
 import org.specs2.mock.Mockito
 import org.specs2.mutable._
 import org.specs2.runner._
-import play.Logger
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test._

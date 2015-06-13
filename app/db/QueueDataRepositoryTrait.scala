@@ -1,5 +1,6 @@
 package db
 
+import java.net.URL
 import java.sql.Connection
 
 import org.joda.time.DateTime
@@ -33,7 +34,14 @@ object QueueData {
   implicit val queueDataFormat = Json.format[QueueData]
 }
 
-case class WebEvent(document_location: String, referrer: Option[String], event: String, id: Int, first_visit: Boolean)
+case class WebEvent(document_location: String, referrer: Option[String], event: String, id: Int, first_visit: Boolean){
+  def hasOffsiteReferrer = {
+    referrer match{
+      case None => true
+      case Some(y) => new URL(document_location).getHost != new URL(y).getHost
+    }
+  }
+}
 
 object WebEvent {
   implicit val webeventReads = Json.reads[WebEvent]

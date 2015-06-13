@@ -1,3 +1,4 @@
+package test
 import awscala._
 import awscala.s3.S3
 import db.QueueData

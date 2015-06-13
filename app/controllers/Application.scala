@@ -2,7 +2,6 @@ package controllers
 
 import db._
 import org.joda.time.DateTime
-import play.Logger
 import play.api.Play.current
 import play.api.db.DB
 import play.api.libs.json._
@@ -24,7 +23,6 @@ object Application extends Controller {
     request.body.validate[QueueData]
       .fold(
       jsonWithErrors => {
-        Logger.error(jsonWithErrors.toString)
         BadRequest(Json.obj(("message","failure")))
       },
       data => {

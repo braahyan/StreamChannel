@@ -1,16 +1,57 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 
+    <!-- Basic Page Needs
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <title>StreamChannel Analytics</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Mobile Specific Metas
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="/assets/stylesheets/normalize.css">
+    <link rel="stylesheet" href="/assets/stylesheets/skeleton.css">
+
+    <!-- Favicon
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
 <body>
-<ul data-bind="foreach:websites">
-    <li><a href="#" data-bind="text:website, click:chartSite"></a></li>
-</ul>
-<div id="chartContainer" style="height: 300px; width: 100%;">
+
+<!-- Primary Page Layout
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<div class="container">
+    <div class="row">
+        <div class="eleven columns" style="margin-top:5%; margin-bottom:5%">
+            <image src="/assets/images/logo_1591515_p48h4sx5_screen_display.png" />
+            <ul data-bind="foreach:websites">
+                <li><a href="#" data-bind="text:website, click:chartSite"></a></li>
+            </ul>
+
+            <div id="chartContainer" class="u-pull-left" style="height: 300px; width: 100%;">
+            </div>
+
+            
+
+            <div id="referrerContainer" class="u-pull-left" style="height: 300px; width: 50%;">
+            </div>
+            <div id="pagesContainer" class="u-pull-left" style="height: 300px; width: 50%;">
+            </div>
+        </div>
+    </div>
 </div>
-<div id="referrerContainer" style="height: 300px; width: 100%;">
-</div>
-<div id="pagesContainer" style="height: 300px; width: 100%;">
-</div>
+
 
 
 
@@ -36,7 +77,7 @@
             var chart = new CanvasJS.Chart("chartContainer",
             {
               title:{
-              text: "WebEvents By Hour"
+              text: "Unique Visitors By Hour"
               },
               axisX:{
                 title: "time",
@@ -58,8 +99,6 @@
                 keys.push(x);
             }
 
-            console.log(keys);
-
             var graphData = keys.map(function(element){
                 return {
                 showInLegend: true,
@@ -67,7 +106,8 @@
                 type: "line",
                 xValueType: "dateTime",
                 dataPoints: data[element].map(function(x){ x.date = new Date(x.date); return x;})
-                                         .sort(function(a,b){ return a.date > b.date}).map(function(event){return {x:event.date, y:event.value}})
+                                         .sort(function(a,b){ return a.date > b.date})
+                                         .map(function(event){return {x:event.date, y:event.value}})
                 }
             });
 
@@ -91,12 +131,11 @@
         });
          var myData = promise.get("/pagedata?website="+i.website).then(function(error, text, xhr) {
             var data = JSON.parse(text);
+            pagedata = data;
             var keys = [];
             for(var x in data){
                 keys.push(x);
             }
-
-            console.log(keys);
 
             var graphData = keys.map(function(element){
                 return {
@@ -105,7 +144,8 @@
                 type: "line",
                 xValueType: "dateTime",
                 dataPoints: data[element].map(function(x){ x.date = new Date(x.date); return x;})
-                                         .sort(function(a,b){ return a.date > b.date}).map(function(event){return {x:event.date, y:event.value}})
+                                         .sort(function(a,b){ return a.date > b.date})
+                                         .map(function(event){return {x:event.date, y:event.value}})
                 }
             });
 

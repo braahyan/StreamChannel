@@ -1,3 +1,4 @@
+package test
 import db.{QueueData, QueueDataRepository}
 import org.junit.runner._
 import org.specs2.mutable._

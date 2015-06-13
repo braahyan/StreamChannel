@@ -70,3 +70,16 @@ case class Website(website:String)
 object Website{
   implicit val websiteFormat = Json.format[Website]
 }
+
+object LandingPageSegment{
+  implicit val landingPageFormat = Json.format[LandingPageSegment]
+}
+case class LandingPageSegment(displayName:String, regex:String, forReferrer:Boolean, website:Option[String]){
+  def matches(webEvent: WebEvent) = {
+    webEvent.hasOffsiteReferrer &&
+      ((forReferrer && webEvent.referrer.fold(false)(x=>x.matches(regex))) ||
+        (!forReferrer && webEvent.document_location.matches(regex))
+        ) &&
+    website.fold(true)(x=>webEvent.document_location.matches(x))
+  }
+}

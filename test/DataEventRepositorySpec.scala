@@ -1,5 +1,5 @@
 package test
-import db.{QueueData, QueueDataRepository}
+import db.{DataEvent, DataEvent$, DataEventRepository}
 import org.junit.runner._
 import org.specs2.mutable._
 import org.specs2.runner._
@@ -9,14 +9,14 @@ import play.api.test._
 
 
 @RunWith(classOf[JUnitRunner])
-class QueueDataRepositorySpec extends Specification {
+class DataEventRepositorySpec extends Specification {
 
 
   "no errors should be thrown when inserting into an empty queue" in new WithApplication {
     DB.withTransaction {
       implicit conn =>
-        val queueDataRepostiory = new QueueDataRepository
-        val id = queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
+        val queueDataRepostiory = new DataEventRepository
+        val id = queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
         id must beSome[Long]
         id must beSome(1)
     }
@@ -25,11 +25,11 @@ class QueueDataRepositorySpec extends Specification {
   "inserting data into an empty queue should allow that data to be retrieved" in new WithApplication {
     DB.withTransaction {
       implicit conn =>
-        val queueDataRepostiory = new QueueDataRepository
+        val queueDataRepostiory = new DataEventRepository
         val queue = queueDataRepostiory.getDataFromQueue()
         queue mustEqual(Nil)
         val dataString = "fooobar"
-        val data = QueueData(JsString(dataString), None)
+        val data = DataEvent(JsString(dataString), None)
         queueDataRepostiory.addDataToQueue(data)
         val newData = queueDataRepostiory.getDataFromQueue()
         newData.length mustEqual(1)
@@ -40,9 +40,9 @@ class QueueDataRepositorySpec extends Specification {
   "purging the queue should ensure that the queue is empty" in new WithApplication {
     DB.withTransaction {
       implicit conn =>
-        val queueDataRepostiory = new QueueDataRepository
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
+        val queueDataRepostiory = new DataEventRepository
+        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
+        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
         val checkData = queueDataRepostiory.getDataFromQueue()
         checkData.length mustEqual(2)
         val deletedRows = queueDataRepostiory.purgeDataFromQueue()
@@ -55,9 +55,9 @@ class QueueDataRepositorySpec extends Specification {
   "count returns appropriate numbers" in new WithApplication {
     DB.withTransaction {
       implicit conn =>
-        val queueDataRepostiory = new QueueDataRepository
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
-        queueDataRepostiory.addDataToQueue(QueueData(JsString(""), None))
+        val queueDataRepostiory = new DataEventRepository
+        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
+        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
         val checkData = queueDataRepostiory.getQueueLength()
         checkData mustEqual(2)
     }

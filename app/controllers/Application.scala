@@ -9,7 +9,7 @@ import play.api.mvc._
 
 
 object Application extends Controller {
-  val queueDataRepo = new QueueDataRepository
+  val queueDataRepo = new DataEventRepository
   val referrerDataRepo = new ReferrerDataRepository
   val visitDataRepo = new VisitDataRepository
   val pageDataRepo = new PageDataRepository
@@ -20,7 +20,7 @@ object Application extends Controller {
   }
 
   def addData() = Action(parse.json) { implicit request =>
-    request.body.validate[QueueData]
+    request.body.validate[DataEvent]
       .fold(
       jsonWithErrors => {
         BadRequest(Json.obj(("message","failure")))

@@ -3,7 +3,7 @@ package upload
 import awscala._
 import awscala.s3._
 import com.amazonaws.services.s3.model.ObjectMetadata
-import db.QueueData
+import db.{DataEvent, DataEvent$}
 import play.api.Play
 import play.api.libs.json._
 
@@ -19,7 +19,7 @@ class S3Uploader {
   val keyRoot = Play.current.configuration.getString("streamchannel.s3.readTarget").get
 
 
-  def GenerateKeyData(beginning:String,queueEntries:Seq[QueueData]):(String, DateTime, DateTime) = {
+  def GenerateKeyData(beginning:String,queueEntries:Seq[DataEvent]):(String, DateTime, DateTime) = {
     val dates = queueEntries.map(x=>x.serverTime.get)
     val maxDate = dates.max
     val minDate = dates.min
@@ -33,7 +33,7 @@ class S3Uploader {
     }
   }
 
-  def UploadQueueEntries(queueEntries:Seq[QueueData])(implicit s3:S3) :String = {
+  def UploadQueueEntries(queueEntries:Seq[DataEvent])(implicit s3:S3) :String = {
 
     val key = GenerateKeyData(keyRoot,queueEntries)
 
@@ -50,7 +50,7 @@ class S3Uploader {
     key._1
   }
 
-  def GetQueueEntries(key:String)(implicit s3:S3) : Seq[QueueData] = {
+  def GetQueueEntries(key:String)(implicit s3:S3) : Seq[DataEvent] = {
     val queueDataS3Object = GetBucket(bucketName).get(key)
       match {
       case None => throw new Exception()
@@ -58,7 +58,7 @@ class S3Uploader {
     }
 
     val queueDataText = Source.fromInputStream(queueDataS3Object.content).mkString
-    val parsedStuff = Json.fromJson[Seq[QueueData]](Json.parse(queueDataText)).fold(x=>throw new Exception(), x=>x)
+    val parsedStuff = Json.fromJson[Seq[DataEvent]](Json.parse(queueDataText)).fold(x=>throw new Exception(), x=>x)
     parsedStuff
 
   }

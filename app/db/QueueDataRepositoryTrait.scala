@@ -3,8 +3,10 @@ package db
 import java.net.URL
 import java.sql.Connection
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Seconds}
 import play.api.libs.json.{JsValue, Json}
+
+import scala.collection.mutable
 
 /**
  * Created by bryan on 5/29/15.
@@ -12,17 +14,21 @@ import play.api.libs.json.{JsValue, Json}
 trait QueueDataRepositoryTrait {
 
 
-  def addDataToQueue(data: QueueData)(implicit conn: Connection): Option[Long]
+  def addDataToQueue(data: DataEvent)(implicit conn: Connection): Option[Long]
 
-  def getDataFromQueue()(implicit conn: Connection): List[QueueData]
+  def getDataFromQueue()(implicit conn: Connection): List[DataEvent]
 
   def purgeDataFromQueue()(implicit conn: Connection): Int
 
   def getQueueLength()(implicit conn: Connection): Int
 }
 
-case class QueueData(data: JsValue, serverTime: Option[DateTime]) {
-  def withTimeStamp(serverTimestamp: DateTime): QueueData = {
+object Joda {
+  implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
+}
+
+case class DataEvent(data: JsValue, serverTime: Option[DateTime]) {
+  def withTimeStamp(serverTimestamp: DateTime): DataEvent = {
     serverTime match {
       case Some(_) => this
       case None => this.copy(serverTime = Some(serverTimestamp))
@@ -30,8 +36,8 @@ case class QueueData(data: JsValue, serverTime: Option[DateTime]) {
   }
 }
 
-object QueueData {
-  implicit val queueDataFormat = Json.format[QueueData]
+object DataEvent {
+  implicit val queueDataFormat = Json.format[DataEvent]
 }
 
 case class WebEvent(document_location: String, referrer: Option[String], event: String, id: Int, first_visit: Boolean){
@@ -74,6 +80,7 @@ object Website{
 object LandingPageSegment{
   implicit val landingPageFormat = Json.format[LandingPageSegment]
 }
+
 case class LandingPageSegment(displayName:String, regex:String, forReferrer:Boolean, website:Option[String]){
   def matches(webEvent: WebEvent) = {
     webEvent.hasOffsiteReferrer &&
@@ -83,3 +90,33 @@ case class LandingPageSegment(displayName:String, regex:String, forReferrer:Bool
     website.fold(true)(x=>webEvent.document_location.matches(x))
   }
 }
+
+case class Visitor(webEvents:Seq[DataEvent]){
+  val sessionLength = 30 * 60
+
+  def getSessions = {
+    import Joda._
+    val sortedEvents = webEvents.sortBy(x=>x.serverTime.get)
+    var previousEvent:DataEvent = sortedEvents.head
+    var currentBuffer:mutable.Buffer[DataEvent] = mutable.Buffer(previousEvent)
+    var myReturnBuffer = mutable.Buffer[mutable.Buffer[DataEvent]](currentBuffer)
+
+    for(event <- sortedEvents.tail){
+      if(Seconds.secondsBetween(previousEvent.serverTime.get, event.serverTime.get).getSeconds > sessionLength){
+
+        currentBuffer = mutable.Buffer(event)
+        myReturnBuffer += currentBuffer
+
+      }
+      else{
+        currentBuffer += event
+      }
+
+      previousEvent = event
+    }
+
+    myReturnBuffer.map(x=>VisitorSession(x))
+  }
+}
+
+case class VisitorSession(webEvents:Seq[DataEvent])

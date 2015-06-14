@@ -1,6 +1,6 @@
 package client
 
-import db.QueueData
+import db.{DataEvent, DataEvent$}
 import org.joda.time.DateTime
 import play.Logger
 import play.api.libs.json.Json
@@ -12,7 +12,7 @@ import scalaj.http.Http
  * Created by bryan on 5/29/15.
  */
 object ScalaClient {
-  def pushData(data: QueueData) = {
+  def pushData(data: DataEvent) = {
     val jsonString = Json.stringify(Json.toJson(data))
     val resp = Http("http://localhost:9000/adddata").header("Content-Type", "application/json").postData(jsonString).asString
     Logger.info(resp.body)
@@ -51,7 +51,7 @@ object ScalaClient {
       }
       for (y <- 1 to Random.nextInt(10)) {
         val firstVisit = if (y ==1 ){true}else{false}
-        val queueData = QueueData(
+        val queueData = DataEvent(
           Json.obj(
             ("first_visit",firstVisit),
             ("event", "page-view"),

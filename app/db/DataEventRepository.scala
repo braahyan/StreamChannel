@@ -9,18 +9,18 @@ import play.api.libs.json.{JsValue, Json}
 /**
  * Created by bryan on 5/20/15.
  */
-class QueueDataRepository extends QueueDataRepositoryTrait {
-  override def addDataToQueue(data: QueueData)(implicit conn: Connection): Option[Long] = {
+class DataEventRepository extends QueueDataRepositoryTrait {
+  override def addDataToQueue(data: DataEvent)(implicit conn: Connection): Option[Long] = {
     val id: Option[Long] = SQL("insert into Queue (data, server_time) values ({data}, {server_time})")
       .on('data -> Json.stringify(data.data), 'server_time -> data.serverTime)
       .executeInsert()
     return id
   }
 
-  override def getDataFromQueue()(implicit conn: Connection): List[QueueData] = {
+  override def getDataFromQueue()(implicit conn: Connection): List[DataEvent] = {
     val query = SQL("select * from Queue").executeQuery()
     query().map(row =>
-      QueueData(Json.parse(row[String]("data"))
+      DataEvent(Json.parse(row[String]("data"))
         .validate[JsValue].fold(x => throw new Exception, x => x),
         row[Option[DateTime]]("server_time"))
     ).toList

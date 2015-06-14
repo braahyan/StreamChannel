@@ -71,7 +71,7 @@ object Global extends GlobalSettings {
       Akka.system.scheduler.schedule(0.microsecond, 5.second) {
         DB.withTransaction {
           implicit conn: Connection =>
-            val queueDataRepository = new QueueDataRepository()
+            val queueDataRepository = new DataEventRepository()
             val queueLength = queueDataRepository.getQueueLength()
             val s3Uploader = new S3Uploader()
             if (queueLength > 0) {

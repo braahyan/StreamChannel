@@ -24,7 +24,7 @@ class LandingPageSegmentSpec extends Specification {
   }
 
   "document location segment matches correctly" in new WithApplication {
-    val segment = LandingPageSegment("Anything", ".*?.*&?something=foo.*",false, None)
+    val segment = LandingPageSegment("Anything", ".*(\\?|\\&)something=foo.*",false, None)
     segment.matches(
       WebEvent("http://reddit.com?something=foo",Some("http://thrivehive.com"), "page-view", 1, true)
     ) should_==(true)

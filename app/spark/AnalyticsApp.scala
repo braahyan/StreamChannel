@@ -34,7 +34,7 @@ object AnalyticsApp {
     val logData = sc.textFile(s"$inputUrl*") // forward slash here causes permissions error, why?
     // this is bad, in a production environment, we should never assume that we're getting the correct data shape
     // eventually it always fails
-    val decodedData = logData.map(x => Json.parse(x).validate[Seq[QueueData]]).flatMap(x => x.get)
+    val decodedData = logData.map(x => Json.parse(x).validate[Seq[DataEvent]]).flatMap(x => x.get)
     val webEventData = decodedData.map(x => (x.serverTime.get, x.data.validate[WebEvent].get)).cache()
 
     // write list of websites we have seen

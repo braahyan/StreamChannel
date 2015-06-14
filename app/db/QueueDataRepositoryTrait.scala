@@ -123,3 +123,6 @@ case class Visitor(webEvents:Seq[DataEvent]){
 }
 
 case class VisitorSession(webEvents:Seq[DataEvent])
+object VisitorSession{
+  implicit val format = Json.format[VisitorSession]
+}

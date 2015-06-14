@@ -38,6 +38,9 @@ object AnalyticsApp {
 
     val webEventData = decodedData.cache()
 
+    val groupedByVisitor = webEventData.groupBy(x=>x.data.id).flatMap(x=> Visitor(x._2.to[Seq]).getSessions)
+      .map(x=>Json.stringify(Json.toJson(x)))
+      .saveAsTextFile(s"$outputUrl/visitorSessions")
 
     // write list of websites we have seen
     webEventData.map(x=>new URL(x.data.document_location).getHost + "\n").distinct()
@@ -57,7 +60,6 @@ object AnalyticsApp {
     pageViewsByHourAndSite(groupedByHourAndSite)
       .map(x=>Json.stringify(Json.toJson(x)))
       .saveAsTextFile(s"$outputUrl/pagesByHour")
-
 
 
   }

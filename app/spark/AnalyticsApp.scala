@@ -35,10 +35,12 @@ object AnalyticsApp {
     // this is bad, in a production environment, we should never assume that we're getting the correct data shape
     // eventually it always fails
     val decodedData = logData.map(x => Json.parse(x).validate[Seq[DataEvent]]).flatMap(x => x.get)
-    val webEventData = decodedData.map(x => (x.serverTime.get, x.data.validate[WebEvent].get)).cache()
+
+    val webEventData = decodedData.cache()
+
 
     // write list of websites we have seen
-    webEventData.map(x=>new URL(x._2.document_location).getHost + "\n").distinct()
+    webEventData.map(x=>new URL(x.data.document_location).getHost + "\n").distinct()
       .saveAsTextFile(s"$outputUrl/websites")
 
     val groupedByHourAndSite = groupByHourAndSite(webEventData)
@@ -56,16 +58,18 @@ object AnalyticsApp {
       .map(x=>Json.stringify(Json.toJson(x)))
       .saveAsTextFile(s"$outputUrl/pagesByHour")
 
+
+
   }
 
   def hourOfDayDateTime(date:DateTime) = {
     new DateTime(date.getYear, date.getMonthOfYear, date.getDayOfMonth, date.getHourOfDay,0)
   }
 
-  def groupByHourAndSite(rdd:RDD[(DateTime,WebEvent)]): RDD[((DateTime, String), Iterable[ WebEvent])] = {
+  def groupByHourAndSite(rdd:RDD[DataEvent]): RDD[((DateTime, String), Iterable[WebEvent])] = {
     rdd
-      .groupBy(x=>(hourOfDayDateTime(x._1), new URL(x._2.document_location).getHost))
-      .map(x=>(x._1, x._2.map(x=>x._2)))
+      .groupBy(x=>(hourOfDayDateTime(x.serverTime.get), new URL(x.data.document_location).getHost))
+      .map(x=>(x._1, x._2.map(x=>x.data)))
   }
 
   def eventsByHourAndSite(rdd: RDD[((DateTime, String), Iterable[WebEvent])]) = {

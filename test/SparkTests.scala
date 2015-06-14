@@ -1,7 +1,7 @@
 
 package test
 
-import db.WebEvent
+import db.{DataEvent, WebEvent}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.joda.time.DateTime
 import org.junit.runner.RunWith
@@ -45,10 +45,10 @@ class SparkJobSpec extends SparkJobSpecification {
 
   "Spark Analytics" should {
     val input = Seq(
-      (new DateTime(2015, 6, 10,1,0), new WebEvent("http://one.com/foo",Some("http://reddit.com"),"page-view",1,false)),
-      (new DateTime(2015, 6, 10,2,0), new WebEvent("http://one.com/bar",Some("http://thrivehive.com"),"page-view",1,false)),
-      (new DateTime(2015, 6, 10,2,0), new WebEvent("http://two.com/baz",Some("http://xkcd.com"),"page-view",1,false)),
-      (new DateTime(2015, 6, 10,2,0), new WebEvent("http://two.com/quux",None,"page-view",2,false))
+      DataEvent(WebEvent("http://one.com/foo",Some("http://reddit.com"),"page-view",1,false), Some(new DateTime(2015, 6, 10,1,0))),
+      DataEvent(WebEvent("http://one.com/bar",Some("http://thrivehive.com"),"page-view",1,false), Some(new DateTime(2015, 6, 10,2,0))),
+      DataEvent(WebEvent("http://two.com/baz",Some("http://xkcd.com"),"page-view",1,false), Some(new DateTime(2015, 6, 10,2,0))),
+      DataEvent(WebEvent("http://two.com/quux",None,"page-view",2,false), Some(new DateTime(2015, 6, 10,2,0)))
     )
 
 

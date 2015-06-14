@@ -1,6 +1,6 @@
 package client
 
-import db.{DataEvent, DataEvent$}
+import db.{WebEvent, DataEvent, DataEvent$}
 import org.joda.time.DateTime
 import play.Logger
 import play.api.libs.json.Json
@@ -52,13 +52,16 @@ object ScalaClient {
       for (y <- 1 to Random.nextInt(10)) {
         val firstVisit = if (y ==1 ){true}else{false}
         val queueData = DataEvent(
-          Json.obj(
+        WebEvent(document_location,referrer,"page-view",x,firstVisit),
+        Some(time)
+
+          /*Json.obj(
             ("first_visit",firstVisit),
             ("event", "page-view"),
             ("id", x),
             ("document_location", document_location),
             ("referrer", referrer)),
-          Some(time))
+          Some(time)*/)
         ScalaClient.pushData(queueData)
         println(queueData)
         referrer = Some(document_location)

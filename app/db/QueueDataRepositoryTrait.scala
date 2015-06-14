@@ -4,7 +4,7 @@ import java.net.URL
 import java.sql.Connection
 
 import org.joda.time.{DateTime, Seconds}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 
 import scala.collection.mutable
 
@@ -27,7 +27,7 @@ object Joda {
   implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
 }
 
-case class DataEvent(data: JsValue, serverTime: Option[DateTime]) {
+case class DataEvent(data: WebEvent, serverTime: Option[DateTime]) {
   def withTimeStamp(serverTimestamp: DateTime): DataEvent = {
     serverTime match {
       case Some(_) => this
@@ -37,6 +37,7 @@ case class DataEvent(data: JsValue, serverTime: Option[DateTime]) {
 }
 
 object DataEvent {
+  implicit val wevent = Json.format[WebEvent]
   implicit val queueDataFormat = Json.format[DataEvent]
 }
 
@@ -50,7 +51,7 @@ case class WebEvent(document_location: String, referrer: Option[String], event: 
 }
 
 object WebEvent {
-  implicit val webeventReads = Json.reads[WebEvent]
+  implicit val webeventReads = Json.format[WebEvent]
 }
 
 case class ReferrerData(date:DateTime, website:String, referrer:String, value:Int)
@@ -92,9 +93,11 @@ case class LandingPageSegment(displayName:String, regex:String, forReferrer:Bool
 }
 
 case class Visitor(webEvents:Seq[DataEvent]){
+  // TODO:our session length in seconds, may want to make this configurable long term, but right now,
+  // choosing the easy way out.
   val sessionLength = 30 * 60
 
-  def getSessions = {
+  def getSessions:Seq[VisitorSession] = {
     import Joda._
     val sortedEvents = webEvents.sortBy(x=>x.serverTime.get)
     var previousEvent:DataEvent = sortedEvents.head

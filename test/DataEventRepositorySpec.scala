@@ -1,5 +1,5 @@
 package test
-import db.{DataEvent, DataEvent$, DataEventRepository}
+import db.{WebEvent, DataEvent, DataEvent$, DataEventRepository}
 import org.junit.runner._
 import org.specs2.mutable._
 import org.specs2.runner._
@@ -16,7 +16,7 @@ class DataEventRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new DataEventRepository
-        val id = queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
+        val id = queueDataRepostiory.addDataToQueue(DataEvent(WebEvent("",Some(""),"",0,false), None))
         id must beSome[Long]
         id must beSome(1)
     }
@@ -28,8 +28,7 @@ class DataEventRepositorySpec extends Specification {
         val queueDataRepostiory = new DataEventRepository
         val queue = queueDataRepostiory.getDataFromQueue()
         queue mustEqual(Nil)
-        val dataString = "fooobar"
-        val data = DataEvent(JsString(dataString), None)
+        val data = DataEvent(WebEvent("",Some(""),"",0,false), None)
         queueDataRepostiory.addDataToQueue(data)
         val newData = queueDataRepostiory.getDataFromQueue()
         newData.length mustEqual(1)
@@ -41,8 +40,8 @@ class DataEventRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new DataEventRepository
-        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
-        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
+        queueDataRepostiory.addDataToQueue(DataEvent(WebEvent("",Some(""),"",0,false), None))
+        queueDataRepostiory.addDataToQueue(DataEvent(WebEvent("",Some(""),"",0,false), None))
         val checkData = queueDataRepostiory.getDataFromQueue()
         checkData.length mustEqual(2)
         val deletedRows = queueDataRepostiory.purgeDataFromQueue()
@@ -56,8 +55,8 @@ class DataEventRepositorySpec extends Specification {
     DB.withTransaction {
       implicit conn =>
         val queueDataRepostiory = new DataEventRepository
-        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
-        queueDataRepostiory.addDataToQueue(DataEvent(JsString(""), None))
+        queueDataRepostiory.addDataToQueue(DataEvent(WebEvent("",Some(""),"",0,false), None))
+        queueDataRepostiory.addDataToQueue(DataEvent(WebEvent("",Some(""),"",0,false), None))
         val checkData = queueDataRepostiory.getQueueLength()
         checkData mustEqual(2)
     }

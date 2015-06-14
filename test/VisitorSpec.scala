@@ -1,11 +1,10 @@
 package test
 
-import db.{DataEvent, Visitor}
+import db.{DataEvent, Visitor, WebEvent}
 import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import play.api.libs.json.JsString
 import play.api.test.WithApplication
 
 /**
@@ -16,9 +15,9 @@ class VisitorSpec extends Specification {
 
   "visitor separates sessions appropriately based on time" in new WithApplication {
     val visitor = new Visitor(Seq(
-      DataEvent(JsString(""), Some(new DateTime(2015, 6, 13,3,0,0))),
-      DataEvent(JsString(""), Some(new DateTime(2015, 6, 13,3,15,0))),
-      DataEvent(JsString(""), Some(new DateTime(2015, 6, 13,3,45,30)))
+      DataEvent(WebEvent("",Some(""),"",0,false), Some(new DateTime(2015, 6, 13,3,0,0))),
+      DataEvent(WebEvent("",Some(""),"",0,false), Some(new DateTime(2015, 6, 13,3,15,0))),
+      DataEvent(WebEvent("",Some(""),"",0,false), Some(new DateTime(2015, 6, 13,3,45,30)))
     ))
 
     val sessions = visitor.getSessions

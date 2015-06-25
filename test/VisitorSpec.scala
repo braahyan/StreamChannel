@@ -23,5 +23,7 @@ class VisitorSpec extends Specification {
     val sessions = visitor.getSessions
     println(sessions)
     sessions.length should_== 2
+    sessions(0).pageViews should_==2
+    sessions(1).pageViews should_==1
   }
 }

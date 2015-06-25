@@ -34,14 +34,14 @@ object ScalaClient {
     val pages = Seq("index.html", "aboutus.html", "contactus.html", "services.html", "pricing.html", "ourteam.html")
     val entryPages = Seq("index.html", "landingpage.html")
     val forms = Map(("contactus.html", "contact-form"), ("landingpage.html", "content-download"))
-
+    val dataEvents = Seq[DataEvent]()
 
     def makeUrl(domain:String, page:String) = {
       s"http://$domain/$page"
     }
 
     val startTime = DateTime.now()
-    for (x <- 1 to 10000) {
+    for (x <- 1 to 1000000) {
       var time = startTime.plusSeconds(Random.nextInt(10000))
       var website = randomElement(websites)
       var document_location = makeUrl(website, randomElement (entryPages))
@@ -52,16 +52,9 @@ object ScalaClient {
       for (y <- 1 to Random.nextInt(10)) {
         val firstVisit = if (y ==1 ){true}else{false}
         val queueData = DataEvent(
-        WebEvent(document_location,referrer,"page-view",x,firstVisit),
-        Some(time)
-
-          /*Json.obj(
-            ("first_visit",firstVisit),
-            ("event", "page-view"),
-            ("id", x),
-            ("document_location", document_location),
-            ("referrer", referrer)),
-          Some(time)*/)
+          WebEvent(document_location,referrer,"page-view",x,firstVisit),
+          Some(time)
+          )
         ScalaClient.pushData(queueData)
         println(queueData)
         referrer = Some(document_location)

@@ -122,7 +122,9 @@ case class Visitor(webEvents:Seq[DataEvent]){
   }
 }
 
-case class VisitorSession(webEvents:Seq[DataEvent])
+case class VisitorSession(webEvents:Seq[DataEvent]){
+  val pageViews = webEvents.length
+}
 object VisitorSession{
   implicit val format = Json.format[VisitorSession]
 }

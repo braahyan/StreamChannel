@@ -22,6 +22,7 @@ object Global extends GlobalSettings {
       Play.current.configuration.getString("streamchannel.aws.clientSecret").get)(Region.US_EAST_1)
     Logger.info(Play.current.configuration.getString("db.default.url").get)
     // todo: figure out the appropriate abstraction to avoid the duplicated code here.
+
     if (Play.current.mode != Mode.Test) {
       // schedules referrerdata check
       Akka.system.scheduler.schedule(0.microsecond, 5.second) {
